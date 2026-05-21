@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: rag-pgvector
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - rag_pg_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  backend:
+    build:
+      context: ../rag_incident_desk_back
+    container_name: rag_incident_desk_back
+    ports:
+      - "${BACKEND_PORT}:8081"
+    depends_on:
+      - postgres
+    environment:
+      SERVER_PORT: 8081
+
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+
+      RAG_PG_HOST: postgres
+      RAG_PG_PORT: 5432
+      RAG_PG_DATABASE: ${POSTGRES_DB}
+      RAG_PG_USER: ${POSTGRES_USER}
+      RAG_PG_PASSWORD: ${POSTGRES_PASSWORD}
+      RAG_PG_TABLE: documentation_chunks
+
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../rag_incident_desk_front
+    container_name: rag_incident_desk_front
+    ports:
+      - "${FRONTEND_PORT}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  rag_pg_data:
