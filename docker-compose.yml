@@ -61,3 +61,4 @@ services:
 
 volumes:
   rag_pg_data:
+  ollama:
