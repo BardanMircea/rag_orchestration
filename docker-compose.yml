@@ -26,6 +26,8 @@ services:
     image: ollama/ollama
     depends_on:
       - ollama
+    environment:
+      OLLAMA_HOST: http://ollama:11434
     entrypoint: >
       /bin/sh -c "
       sleep 10;
@@ -42,9 +44,12 @@ services:
     ports:
       - "${BACKEND_PORT}:8081"
     depends_on:
-      - postgres
-      - ollama
-      - ollama-init
+      postgres:
+        condition: service_started
+      ollama:
+        condition: service_started
+      ollama-init:
+        condition: service_completed_successfully
 
     environment:
       SERVER_PORT: 8081
