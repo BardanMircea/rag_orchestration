@@ -22,6 +22,19 @@ services:
       - ollama:/root/.ollama
     restart: unless-stopped
 
+  ollama-init:
+    image: ollama/ollama
+    depends_on:
+      - ollama
+    entrypoint: >
+      /bin/sh -c "
+      sleep 10;
+      ollama pull llama3;
+      ollama pull nomic-embed-text;
+      "
+    volumes:
+      - ollama:/root/.ollama
+
   backend:
     build:
       context: ../rag_incident_desk_back
@@ -30,6 +43,9 @@ services:
       - "${BACKEND_PORT}:8081"
     depends_on:
       - postgres
+      - ollama
+      - ollama-init
+
     environment:
       SERVER_PORT: 8081
 
