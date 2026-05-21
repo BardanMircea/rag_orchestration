@@ -31,7 +31,7 @@ services:
     entrypoint: >
       /bin/sh -c "
       sleep 10;
-      ollama pull llama3;
+      ollama pull llama3.2:1b;
       ollama pull nomic-embed-text;
       "
     volumes:
