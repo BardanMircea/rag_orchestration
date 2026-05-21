@@ -12,6 +12,16 @@ services:
       - rag_pg_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  ollama:
+    build:
+      context: ./ollama
+    container_name: rag_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    restart: unless-stopped
+
   backend:
     build:
       context: ../rag_incident_desk_back
@@ -35,7 +45,7 @@ services:
       RAG_PG_TABLE: documentation_chunks
 
       JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
 
     restart: unless-stopped
 
